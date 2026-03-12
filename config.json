@@ -1,8 +1,12 @@
 {
-  "model": "qwen3-vl:235b-cloud",
+  "model": "glm-5:cloud",
   "temperature": 0.7,
   "top_p": 0.9,
-  "seed": "95177986",
+  "seed": "912071301",
   "num_ctx": 4096,
-  "system_prompt": "You're helpful AI"
+  "system_prompt": "Youre helpfull AI assistant.",
+  "comfyui_seed": 660001711,
+  "comfyui_cfg": 1.0,
+  "comfyui_steps": 8,
+  "comfyui_workflow": "api_z_image_turbo.json"
 }

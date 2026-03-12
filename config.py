@@ -9,7 +9,11 @@ DEFAULT_CONFIG = {
     "top_p": 0.9,
     "seed": None,
     "num_ctx": 4096,
-    "system_prompt": "You are a helpful assistant."
+    "system_prompt": "You are a helpful assistant.",
+    "comfyui_seed": 0,
+    "comfyui_cfg": 3.5,
+    "comfyui_steps": 35,
+    "comfyui_workflow": ""
 }
 
 
