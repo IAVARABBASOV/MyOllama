@@ -1,10 +1,10 @@
 {
   "model": "glm-5:cloud",
-  "temperature": 0.7,
+  "temperature": 0.8,
   "top_p": 0.9,
-  "seed": "912071301",
+  "seed": "700094533",
   "num_ctx": 4096,
-  "system_prompt": "Youre helpfull AI assistant.",
+  "system_prompt": "You're helpfull Ai Assistant.",
   "comfyui_seed": 660001711,
   "comfyui_cfg": 1.0,
   "comfyui_steps": 8,
