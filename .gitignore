@@ -135,6 +135,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+image_out/
 
 # Spyder project settings
 .spyderproject

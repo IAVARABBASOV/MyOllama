@@ -11,9 +11,12 @@ A user-friendly web interface for interacting with Ollama large language models.
 - **Parameter Tuning**: Adjust temperature, top_p, context length, and seed for fine-tuned control
 - **Vision Support**: Upload images for vision-capable models (llava, llama3.2-vision, etc.)
 - **Image Generation**: Generate images using compatible models (flux, sdxl, etc.)
+- **ComfyUI Integration**: Advanced image generation using customizable ComfyUI workflows
+- **Tool Calling**: Ollama function calling for seamless image generation via natural language
 - **Streaming Responses**: Real-time token-by-token response streaming
 - **Persistent Settings**: Save and load your preferred configuration
 - **System Prompts**: Customize model behavior with custom system prompts
+- **Clickable Images**: Click generated images to open full-size in new tab
 
 ## Prerequisites
 
@@ -88,9 +91,12 @@ MyOllama/
 ├── requirements.txt       # Python dependencies
 ├── utils/
 │   ├── __init__.py       # Package initialization
-│   └── ollama_utils.py   # Ollama API wrapper
+│   ├── ollama_utils.py   # Ollama API wrapper
+│   └── comfyui_utils.py # ComfyUI API wrapper
+├── ComfyApi/             # ComfyUI workflow JSON files
 ├── image_out/            # Generated images (auto-created)
-└── run.bat               # Windows launcher script
+├── run.bat               # Windows launcher script
+└── ollama.ico            # Application icon
 ```
 
 ### File Descriptions
@@ -99,8 +105,11 @@ MyOllama/
 |------|-------------|
 | `app.py` | Main application file containing the Gradio interface, event handlers, and UI components |
 | `config.py` | Handles loading and saving configuration settings to `config.json` |
-| `utils/ollama_utils.py` | Wrapper functions for Ollama API calls including model listing, chat streaming, and image generation |
-| `requirements.txt` | Lists Python package dependencies (gradio, ollama) |
+| `utils/ollama_utils.py` | Wrapper functions for Ollama API calls including model listing, chat streaming, vision, and image generation |
+| `utils/comfyui_utils.py` | ComfyUI API wrapper for image generation using custom workflows |
+| `ComfyApi/` | Directory containing ComfyUI workflow JSON files for image generation |
+| `requirements.txt` | Lists Python package dependencies (gradio, ollama, requests, websocket-client) |
+| `config.json` | Saved user settings including model, parameters, and ComfyUI configuration |
 
 ## Architecture
 
@@ -122,6 +131,12 @@ The application follows a modular three-layer architecture:
 - **Defaults**: Provides sensible default values for all parameters
 - **Validation**: Merges saved config with defaults for robustness
 
+### 4. ComfyUI Integration Layer (`utils/comfyui_utils.py`)
+- **Workflow Management**: Loads and parses ComfyUI workflow JSON files
+- **WebSocket Communication**: Real-time connection to ComfyUI server
+- **Parameter Injection**: Dynamically updates prompt, seed, CFG, and steps
+- **Image Processing**: Handles base64 encoding/decoding for generated images
+
 ### Data Flow
 
 ```
@@ -129,11 +144,11 @@ User Input (Message/Image)
         ↓
     Gradio UI (app.py)
         ↓
-  Event Handler (respond/pull_new_model)
+   Event Handler (respond/pull_new_model)
         ↓
-  ollama_utils.py functions
+   ollama_utils.py functions
         ↓
-    Ollama API
+     Ollama API / ComfyUI API
         ↓
   Streaming Response / Image
         ↓
@@ -162,6 +177,21 @@ When a vision model is selected (e.g., `llava`, `llama3.2-vision`), an image upl
 
 For image generation models (e.g., `flux`, `sdxl`), the model will generate and display images based on your text prompts.
 
+### ComfyUI Image Generation
+
+ComfyUI integration allows you to generate images using customizable workflows:
+
+1. **Enable ComfyUI**: Check the "Enable ComfyUI" checkbox in the sidebar
+2. **Select Workflow**: Choose a workflow from the dropdown (e.g., `api_z_image_turbo.json`)
+3. **Trigger Generation**: Include "generate image" in your message along with your prompt
+   - Example: "generate image a beautiful sunset over mountains"
+4. **Adjust Parameters**:
+   - **Seed**: Control randomness for reproducible results (click 🎲 for random)
+   - **CFG Scale**: Guidance strength (lower = more creative, higher = more precise)
+   - **Steps**: Number of denoising steps (more = better quality, slower)
+
+**Note**: ComfyUI must be running on `http://127.0.0.1:8188` for image generation to work.
+
 ### Saving Settings
 
 Click "Save Settings" to persist your current model and parameter choices. These will be restored when you next run the application.
@@ -177,7 +207,11 @@ DEFAULT_CONFIG = {
     "top_p": 0.9,
     "seed": None,
     "num_ctx": 4096,
-    "system_prompt": "You are a helpful assistant."
+    "system_prompt": "You are a helpful assistant.",
+    "comfyui_seed": 0,
+    "comfyui_cfg": 3.5,
+    "comfyui_steps": 35,
+    "comfyui_workflow": ""
 }
 ```
 
@@ -205,6 +239,20 @@ The default port is 7860. If it's in use, modify `app.py`:
 ```python
 demo.launch(allowed_paths=["image_out"], inbrowser=True, server_port=7861)
 ```
+
+### Cannot Connect to ComfyUI
+
+Ensure ComfyUI is running with the API enabled:
+1. Start ComfyUI normally (it should auto-enable the API at port 8188)
+2. Verify the server is accessible at `http://127.0.0.1:8188`
+3. Check that workflow files exist in the `ComfyApi/` directory
+
+### Workflow Not Found
+
+If you see workflow errors:
+1. Ensure JSON files are in the `ComfyApi/` directory
+2. Select a valid workflow from the dropdown
+3. Verify the workflow contains required nodes (CLIPTextEncode, KSampler)
 
 ## License
 
